@@ -1,0 +1,21 @@
+#!/bin/bash
+x=1
+y=2
+case "$1" in
+ -*) a=${1#-}; x=${a%%:*}; a=${a#*:}; y=${a%%:*}; shift;
+esac
+{
+ echo "set parametric ; set xlabel '$x' ; set ylabel '$y'"
+ echo -en "plot "
+ {
+  for i; do
+   echo -n "'$i' u $x:$y,"
+  done
+  echo
+ } | sed 's/,$//'
+ echo
+ while : ; do
+  echo 'replot'
+  sleep 1
+ done
+} | gnuplot -geometry 900x600

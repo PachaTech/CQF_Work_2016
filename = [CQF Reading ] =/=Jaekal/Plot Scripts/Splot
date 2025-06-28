@@ -1,0 +1,37 @@
+#!/bin/bash
+x=1
+y=2
+z=3
+case "$1" in
+ -*)
+   a=${1#-}; x=${a%%:*}; a=${a\#*:};
+   y=${a%%:*};  a=${a#*:}; z=${a%%:*};
+   shift;
+esac
+{
+ echo 'set grid; set ticslevel 0'
+ echo 'set border 4095; set data style lines'
+ echo "set xlabel '$x';set ylabel '$y';set zlabel '$z'"
+ echo -en "splot "
+ {
+  for i; do
+   echo -n "'$i' u $x:$y:$z,"
+  done
+  echo
+ } | sed 's/,$//'
+ echo
+ echo 'psi=65'
+ echo 'phi=80'
+ echo 'dphi=2.3'
+ echo 'dpsi=5.1'
+ echo 'theta(psi)=55+32.5*cos(psi/180.*pi)'
+ while : ; do
+  echo 'set view theta(psi),phi'
+  echo 'replot'
+  sleep 1
+  echo 'phi = phi + dphi'
+  echo 'phi = (phi>360?phi-360:phi)'
+  echo 'psi=psi+dpsi'
+  echo 'psi = (psi>360?psi-360:psi)'
+ done
+} | gnuplot -geometry 900x600
