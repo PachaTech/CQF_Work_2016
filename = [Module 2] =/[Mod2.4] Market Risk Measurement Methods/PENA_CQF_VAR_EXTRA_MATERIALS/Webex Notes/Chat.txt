@@ -1,0 +1,8 @@
+﻿08/15/2016    12:59:48 PM    from CQF Faculty to Everyone:	Hello to everyone and welcome!
+08/15/2016    13:00:06 PM    from CQF Faculty to Everyone:	We will start now...
+08/15/2016    13:01:49 PM    from Michael_E to CQF Faculty (privately):	Good evening Dr Pena
+08/15/2016    13:27:28 PM    from Michael_E to CQF Faculty (privately):	Just to reiterate what you said, just in case I misunderstood.  Dr. Pena, you're saying, that the variance here ---  Std dev 2.33 or roughly 2.5 sigma away from the mean? which is 99% confidence?   1 day VaR?
+08/15/2016    13:52:48 PM    from Michael_E to CQF Faculty (privately):	When you're backtesting:  Are you using end of day Closing values?  Or are you discretized or continuous?
+08/15/2016    14:02:09 PM    from Michael_E to CQF Faculty (privately):	Dr. Pena.     I apologize, if this is somewhat unrelated to the 5 questions we're discusing now, but The last few days you've been referring to several PDF files that you got from the Basel sites or CFA or wherever, and I've been looking for the uploads on the portal and I have the notes and the annotated white board, but none of the extra material you referrerd in lectures.   
+08/15/2016    14:03:15 PM    from Michael_E to CQF Faculty (privately):	Thank you again, 
+08/15/2016    14:04:02 PM    from Michael_E to CQF Faculty (privately):	Enjoy Milan!!
