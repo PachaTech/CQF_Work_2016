@@ -1,0 +1,91 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red0\green128\blue0;\red0\green0\blue128;}
+\margl1440\margr1440\vieww17860\viewh15400\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs22 \cf2 ' Cubic Spline function\
+\cf3 Function\cf0  cubicspline(x_input \cf3 As\cf0  Range, y_input \cf3 As\cf0  Range, x \cf3 As\cf0  \cf3 Double\cf0 )\
+\
+\cf3 Dim\cf0  xlen \cf3 As\cf0  \cf3 Integer\
+Dim\cf0  ylen \cf3 As\cf0  \cf3 Integer\
+\cf0 \
+xlen = x_input.Rows.Count\
+ylen = y_input.Rows.Count\
+\
+\cf3 If\cf0  xlen <> ylen \cf3 Then\
+\cf0     \cf3 GoTo\cf0  EXIT_NOW\
+\cf3 End\cf0  \cf3 If\
+\cf0  \
+\cf3 ReDim\cf0  xin(xlen) \cf3 As\cf0  \cf3 Single\
+ReDim\cf0  yin(xlen) \cf3 As\cf0  \cf3 Single\
+\cf0 \
+\cf3 Dim\cf0  c \cf3 As\cf0  \cf3 Integer\
+\cf0 \
+\cf3 For\cf0  c = 1 \cf3 To\cf0  xlen\
+    xin(c) = x_input(c)\
+    yin(c) = y_input(c)\
+\cf3 Next\cf0  c\
+\
+\cf3 Dim\cf0  n \cf3 As\cf0  \cf3 Integer\
+Dim\cf0  i, k \cf3 As\cf0  \cf3 Integer\
+Dim\cf0  p, qn, sig, un \cf3 As\cf0  \cf3 Single\
+ReDim\cf0  u(xlen - 1) \cf3 As\cf0  \cf3 Single\
+ReDim\cf0  yt(xlen) \cf3 As\cf0  \cf3 Single\
+\cf0 \
+n = xlen\
+yt(1) = 0\
+u(1) = 0\
+\
+\cf3 For\cf0  i = 2 \cf3 To\cf0  n - 1\
+    sig = (xin(i) - xin(i - 1)) / (xin(i + 1) - xin(i - 1))\
+    p = sig * yt(i - 1) + 2\
+    yt(i) = (sig - 1) / p\
+    u(i) = (yin(i + 1) - yin(i)) / (xin(i + 1) - xin(i)) - (yin(i) - yin(i - 1)) / (xin(i) - xin(i - 1))\
+    u(i) = (6 * u(i) / (xin(i + 1) - xin(i - 1)) - sig * u(i - 1)) / p\
+    \
+    \cf3 Next\cf0  i\
+    \
+qn = 0\
+un = 0\
+\
+yt(n) = (un - qn * u(n - 1)) / (qn * yt(n - 1) + 1)\
+\
+\cf3 For\cf0  k = n - 1 \cf3 To\cf0  1 \cf3 Step\cf0  -1\
+    yt(k) = yt(k) * yt(k + 1) + u(k)\
+\cf3 Next\cf0  k\
+\
+\
+\cf3 Dim\cf0  klo, khi \cf3 As\cf0  \cf3 Integer\
+Dim\cf0  h, b, a \cf3 As\cf0  \cf3 Single\
+\cf0 \
+klo = 1\
+khi = n\
+\cf3 Do\
+\cf0 k = khi - klo\
+    \cf3 If\cf0  xin(k) > x \cf3 Then\
+\cf0     khi = k\
+\cf3 Else\
+\cf0     klo = k\
+\cf3 End\cf0  \cf3 If\
+\cf0 k = khi - klo\
+\cf3 Loop\cf0  \cf3 While\cf0  k > 1\
+    h = xin(khi) - xin(klo)\
+    a = (xin(khi) - x) / h\
+    b = (x - xin(klo)) / h\
+    y = a * yin(klo) + b * yin(khi) + ((a ^ 3 - a) * yt(klo) + (b ^ 3 - b) * yt(khi)) * (h ^ 2) / 6\
+\
+\
+cubicspline = y\
+\
+EXIT_NOW:\
+\cf3 End\cf0  \cf3 Function\
+\cf0 \
+\
+\
+\
+\
+\
+\
+\
+}
