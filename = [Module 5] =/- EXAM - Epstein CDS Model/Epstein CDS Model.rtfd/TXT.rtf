@@ -1,0 +1,262 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\fmodern\fcharset0 Courier;\f2\fnil\fcharset0 Consolas;
+\f3\fnil\fcharset134 STSongti-SC-Regular;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue233;\red0\green0\blue0;\red251\green0\blue7;
+\red0\green0\blue255;\red15\green112\blue1;\red37\green127\blue159;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid101\'02\'00.;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}.}{\leveltext\leveltemplateid102\'02\'01.;}{\levelnumbers\'01;}\fi-360\li1440\lin1440 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\margl1440\margr1440\vieww15940\viewh8400\viewkind1
+\deftab720
+\pard\pardeftab720\sl560\sa321\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/"}}{\fldrslt 
+\f0\b\fs48 \cf2 \expnd0\expndtw0\kerning0
+\ul \ulc2 \outl0\strokewidth0 \strokec2 Tools for finance}}
+\f0\b\fs48 \cf3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3  \
+\pard\pardeftab720\sl280\sa240\partightenfactor0
+
+\b0\fs24 \cf3 a market risk developer point of view\
+\pard\pardeftab720\sl440\sa298\partightenfactor0
+
+\b\fs36 \cf3 Friday, August 15, 2014\
+\pard\pardeftab720\sl340\sa280\partightenfactor0
+
+\fs28 \cf3 Bootstrapping default probabilities from CDS prices in VBA \
+\pard\pardeftab720\sl280\partightenfactor0
+
+\b0\fs24 \cf3 \
+Default probabilities are needed when dealing with credit market models. This time, I wanted to present one simple algorithm for bootstrapping default probabilities from CDS market prices. Final product will be just one simple Excel/VBA worksheetfunction, which can be quickly copy-pasted and used in VBE standard module.\
+\
+\
+\pard\pardeftab720\sl340\sa298\partightenfactor0
+
+\b\fs28 \cf3 IMPLIED SURVIVAL PROBABILITY
+\fs36 \
+\pard\pardeftab720\sl280\partightenfactor0
+
+\b0\fs24 \cf3 Calculating implied survival probabilities from CDS prices follows the same idea, as calculating implied volatility from option price. For options, we have known market price, from which we can numerically solve the corresponding option volatility by using option pricing model. For CDS, we have known market price, from which we can solve the corresponding survival probability by using\'a0{\field{\*\fldinst{HYPERLINK "http://en.wikipedia.org/wiki/Credit_default_swap"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 CDS pricing model}}. This is exactly the procedure, what this algorithm is doing. However, instead of just calculating one survival probability for a given CDS price, the algorithm is calculating all survival probabilities for a given CDS term structure. The pricing model for CDS is standard model (JP Morgan approach).\
+\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf4 \strokec4 Update (9.11.2016)\cf3 \strokec3  : This presented implementation (using simple JP Morgan CDS model) ignores the effect of premium leg accruals. The resulting bias is relatively insignificant for low CDS levels but becomes material with high CDS levels. The issue has been chewed in the {\field{\*\fldinst{HYPERLINK "http://www.javaquant.net/papers/ValuationCDSLehman.pdf"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 paper}} published by Lehman Brothers Fixed Income Quantitative Credit Research (Dominic O'Kane, Stuart Turnbull). On chapter 5, there is a discussion concerning premium leg valuation and related accrual effects. There is also a suggestion available for including premium accrual into this CDS pricing model. Thanks for attentive blog visitor for outlining this issue.\
+\
+\
+\pard\pardeftab720\sl340\sa298\partightenfactor0
+
+\b\fs28 \cf3 FUNCTION INPUT/OUTPUT
+\fs36 \
+\pard\pardeftab720\sl280\partightenfactor0
+
+\b0\fs24 \cf3 Zero-coupon bond prices, CDS prices and recovery rate assumption are needed as market data input for calculations. VBA function 
+\b survivalProbability
+\b0  takes market information matrix (curves) and recovery rate assumption value (recovery) as input parameters. Function then returns an array of survival probabilities. Default probabilities can then be calculated from survival probabilities.\
+\
+Input market information matrix (N x 3) should contain the following data in the following order:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl280\partightenfactor0
+\ls1\ilvl0\cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 1st row vector - maturities in years\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 2nd row vector - zero-coupon bond prices (ex. 0.9825)\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\'95	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 3rd row vector - CDS prices as basis points (ex. 0.25 % is given as 25)\
+\pard\pardeftab720\sl280\partightenfactor0
+\cf3 \
+After giving required input parameters for this function and selecting correct range for function output, remember to press CTRL+SHIFT+ENTER for retrieving result array (N x 1) into worksheet.\
+\
+\
+\pard\pardeftab720\sl340\sa298\partightenfactor0
+
+\b\fs28 \cf3 VBA FUNCTION
+\fs36 \
+
+\f1\b0\fs24 \cf0 \outl0\strokewidth0 __________________________________________________________________________\
+\pard\pardeftab720\sl300\partightenfactor0
+\cf5 \outl0\strokewidth0 \strokec5 \
+
+\f2\fs20 Option\cf3 \strokec3  Explicit\
+\pard\pardeftab720\sl300\partightenfactor0
+\cf6 \strokec6 '\cf3 \strokec3 \
+\cf6 \strokec6 ' function takes market curves matrix (Nx3) and recovery rate (1x1) as arguments, then calculates and\cf3 \strokec3 \
+\cf6 \strokec6 ' returns vector of survival probabilities (Nx1) for a given market data\cf3 \strokec3 \
+\cf6 \strokec6 ' matrix input data order: 1st row vector = time, 2nd row vector = zero-coupon bond prices,\cf3 \strokec3 \
+\cf6 \strokec6 ' 3rd row vector = cds rates in basis points\cf3 \strokec3 \
+\pard\pardeftab720\sl300\partightenfactor0
+\cf5 \strokec5 Public\cf3 \strokec3  \cf5 \strokec5 Function\cf3 \strokec3  survivalProbability(\cf5 \strokec5 ByRef\cf3 \strokec3  curves \cf5 \strokec5 As\cf3 \strokec3  Range, \cf5 \strokec5 ByVal\cf3 \strokec3  recovery \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 ) \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Variant\cf3 \strokec3 \
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf6 \strokec6 ' information for dimensioning arrays\cf3 \strokec3 \
+    \cf5 \strokec5 Dim\cf3 \strokec3  nColumns \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Integer\cf3 \strokec3 : nColumns = curves.Columns.Count\
+    \cf5 \strokec5 Dim\cf3 \strokec3  nRows \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Integer\cf3 \strokec3 : nRows = curves.Rows.Count\
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf6 \strokec6 ' create arrays for data\cf3 \strokec3 \
+    \cf5 \strokec5 Dim\cf3 \strokec3  p() \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 : \cf5 \strokec5 ReDim\cf3 \strokec3  p(0 \cf5 \strokec5 To\cf3 \strokec3  nRows)\
+    \cf5 \strokec5 Dim\cf3 \strokec3  c() \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 : \cf5 \strokec5 ReDim\cf3 \strokec3  c(0 \cf5 \strokec5 To\cf3 \strokec3  curves.Rows.Count, 1 \cf5 \strokec5 To\cf3 \strokec3  curves.Columns.Count)\
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf6 \strokec6 ' copy variant array data into new array, having 1 additional item for today\cf3 \strokec3 \
+    c(0, 1) = 0: c(0, 2) = 1: c(0, 3) = 0\
+    \cf5 \strokec5 Dim\cf3 \strokec3  cInput \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Variant\cf3 \strokec3 : cInput = curves.Value2\
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf5 \strokec5 Dim\cf3 \strokec3  i \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Integer\cf3 \strokec3 , j \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Integer\cf3 \strokec3 , k \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Integer\cf3 \strokec3 \
+    \cf5 \strokec5 For\cf3 \strokec3  i = 1 \cf5 \strokec5 To\cf3 \strokec3  nRows\
+        c(i, 1) = cInput(i, 1)\
+        c(i, 2) = cInput(i, 2)\
+        c(i, 3) = cInput(i, 3)\
+    \cf5 \strokec5 Next\cf3 \strokec3  i\
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf6 \strokec6 ' calculation of survival probabilities (SP)\cf3 \strokec3 \
+    \cf5 \strokec5 Dim\cf3 \strokec3  L \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 : L = (1 - recovery)\
+    \cf5 \strokec5 Dim\cf3 \strokec3  term \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 , terms \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 , divider \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 , term1 \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 , term2 \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 \
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf5 \strokec5 For\cf3 \strokec3  i = LBound(p) \cf5 \strokec5 To\cf3 \strokec3  UBound(p)\
+        \cf6 \strokec6 '\cf3 \strokec3 \
+        \cf5 \strokec5 If\cf3 \strokec3  (i = 0) \cf5 \strokec5 Then\cf3 \strokec3  p(i) = 1# \cf6 \strokec6 ' SP today is one\cf3 \strokec3 \
+        \cf5 \strokec5 If\cf3 \strokec3  (i = 1) \cf5 \strokec5 Then\cf3 \strokec3  p(i) = L / ((c(i, 3) / 10000) * (c(i, 1) - c(i - 1, 1)) + L) \cf6 \strokec6 ' first SP formula\cf3 \strokec3 \
+        \cf6 \strokec6 '\cf3 \strokec3 \
+        \cf5 \strokec5 If\cf3 \strokec3  (i > 1) \cf5 \strokec5 Then\cf3 \strokec3  \cf6 \strokec6 ' SP after first period are calculated recursively\cf3 \strokec3 \
+            terms = 0\
+            \cf5 \strokec5 For\cf3 \strokec3  j = 1 \cf5 \strokec5 To\cf3 \strokec3  (i - 1)\
+                term = c(j, 2) * (L * p(j - 1) - (L + (c(j, 1) - c(j - 1, 1)) * (c(i, 3) / 10000)) * p(j))\
+                terms = terms + term\
+            \cf5 \strokec5 Next\cf3 \strokec3  j\
+            \cf6 \strokec6 '\cf3 \strokec3 \
+            divider = c(i, 2) * (L + (c(i, 1) - c(i - 1, 1)) * (c(i, 3) / 10000))\
+            term1 = terms / divider\
+            term2 = (p(i - 1) * L) / (L + (c(i, 1) - c(i - 1, 1)) * (c(i, 3) / 10000))\
+            p(i) = term1 + term2\
+        \cf5 \strokec5 End\cf3 \strokec3  \cf5 \strokec5 If\cf3 \strokec3 \
+    \cf5 \strokec5 Next\cf3 \strokec3  i\
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf6 \strokec6 ' create output array excluding the first SP (for today)\cf3 \strokec3 \
+    \cf5 \strokec5 Dim\cf3 \strokec3  result() \cf5 \strokec5 As\cf3 \strokec3  \cf7 \strokec7 Double\cf3 \strokec3 : \cf5 \strokec5 ReDim\cf3 \strokec3  result(1 \cf5 \strokec5 To\cf3 \strokec3  UBound(p))\
+    \cf5 \strokec5 For\cf3 \strokec3  i = 1 \cf5 \strokec5 To\cf3 \strokec3  UBound(p)\
+        result(i) = p(i)\
+    \cf5 \strokec5 Next\cf3 \strokec3  i\
+    \cf6 \strokec6 '\cf3 \strokec3 \
+    \cf6 \strokec6 ' finally, transpose output array (Nx1)\cf3 \strokec3 \
+    survivalProbability = Application.WorksheetFunction.Transpose(result)\
+\cf5 \strokec5 End\cf3 \strokec3  \cf5 \strokec5 Function\cf3 \strokec3 \
+\pard\pardeftab720\sl300\partightenfactor0
+\cf6 \strokec6 '\cf3 \strokec3 \
+\pard\pardeftab720\sl300\partightenfactor0
+
+\f1\fs24 \cf3 __________________________________________________________________________\
+\
+\pard\pardeftab720\sl340\sa298\partightenfactor0
+
+\f0\b\fs28 \cf3 CALCULATION EXAMPLE\
+\pard\pardeftab720\sl280\partightenfactor0
+
+\b0\fs24 \cf3 The following Excel screenshot presents the calculation of default probabilities for Barclays and HSBC. Market data has been retrieved in early January 2014. VBA function input matrix (curves) has been marked with yellow color. Function output range has been marked with blue color. Default probability (PD) is calculated in 
+\b column G.
+\b0 \
+
+\b\fs28 \
+\pard\pardeftab720\sl280\sa319\partightenfactor0
+
+\fs24 \cf3 21 comments:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl280\partightenfactor0
+\ls2\ilvl0
+\b0 \cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1416936398896#c5080157604235873731"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 November 25, 2014 at 7:26 PM}}
+\i0 \uc0\u8232 Man, you have just saved my CQF module5 :). Was very low on time due to work issues.\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17092818463104704509"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Mikael Katajam\'e4ki}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1416984780558#c8714176159745436229"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 November 26, 2014 at 8:53 AM}}\uc0\u8232 Glad I was able to help you :)\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	3.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1416998716258#c7987257871462250474"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 November 26, 2014 at 12:45 PM}}
+\i0 \uc0\u8232 Thank you, you have an excellent blog.\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	4.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1417029438416#c2825972286492233614"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 November 26, 2014 at 9:17 PM}}
+\i0 \uc0\u8232 Row and column vectors mix up :S\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	5.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1417989256749#c8764283565221032703"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 December 7, 2014 at 11:54 PM}}
+\i0 \uc0\u8232 I come from a CS background, it's rare to see such clean VBA code. Congrats!\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	6.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1418032458910#c1897244712563527632"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 December 8, 2014 at 11:54 AM}}
+\i0 \uc0\u8232 Could you tell which formulae have been used?\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	7.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17092818463104704509"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Mikael Katajam\'e4ki}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1418564780027#c453719818248589376"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 December 14, 2014 at 3:46 PM}}\uc0\u8232 Standard CDS pricing model is used. Survival probability is usually input for this model, but here it is solved out by using pricing model since we know the actual CDS prices. Since we are solving n survival probabilities, we are using bootstrapping method. After some algebra applied to pricing model, you will end up with formulas used in the main loop of this function.\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	8.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i william{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1428420811489#c7962112263464507646"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 April 7, 2015 at 6:33 PM}}
+\i0 \uc0\u8232 Thanks for the code.\u8232 Just a quick questions can I use this to extend to simulate CDS spreads/ ZCB yields?\u8232 eg, lets say if I use HW or HJM to simulate the spreads/yields and then use boostraps to calculate hazard rates?\u8232 Thanks a lot..\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	9.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1444013822430#c3398150365404086580"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 October 5, 2015 at 5:57 AM}}
+\i0 \uc0\u8232 Hi, thanks a lot for posting this code! Just to double check my understanding of this, looking at the code I see that on the recursive calculation of terms you fixed the CDS value at each tenor by using i instead of j --> c(i, 3)/10000. Conceptually what would it mean to use the CDS of each previous year in the recursive calculation, that is using j instead of i? \u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	10.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17816194858540071372"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Matt Razafi}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1449511003617#c8270856474876646051"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 December 7, 2015 at 7:56 PM}}\uc0\u8232 Hi,\u8232 \u8232 I'm newbie with VBA.\u8232 I got some error when I tried to used Function with the data in excel below:#VALUE \u8232 =survivalProbability(B16:D20;40%). I used CTRL+SHIFT+ENTER as wrote.\u8232 Can anybody help please ?\u8232 \u8232 Thanks-Matt\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Replies}}\
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl280\partightenfactor0
+\ls2\ilvl1\cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17092818463104704509"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Mikael Katajam\'e4ki}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1452776102033#c7956254158701566701"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 January 14, 2016 at 2:55 PM}}\uc0\u8232 I just replicated the data in Excel and retrieved correct survival probabilities. The program is working. I may dare to say, that you are most probably doing something incorrectly.\u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl1\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/04425611927362671458"}}{\fldrslt 
+\f3 \cf2 \ul \ulc2 \strokec2 \'ca\'d0\'b4\'a8\'91\'63\'ca\'b7}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1457621341885#c5590977819230380652"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 March 10, 2016 at 4:49 PM}}\uc0\u8232 survivalProbability(B16:D20,40%)\u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl1\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	3.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl280\partightenfactor0
+\ls2\ilvl0\cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	11.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	12.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/08572550802892938699"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Unknown}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1450307571923#c1009800731808822436"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 December 17, 2015 at 1:12 AM}}\uc0\u8232 Can anyone explain the term, terms, divider used in the code?\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Replies}}\
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl280\partightenfactor0
+\ls2\ilvl1\cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17092818463104704509"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Mikael Katajam\'e4ki}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1452775862785#c7410997379879401568"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 January 14, 2016 at 2:51 PM}}\uc0\u8232 term, terms, divider, term1 and term2 are just temporary variables used to save some space and to make program a bit more readable.\u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl1\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl280\partightenfactor0
+\ls2\ilvl0\cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	13.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	14.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/00626246815623792582"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Holger Fullriede}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1474057016143#c6660634524030308782"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 September 16, 2016 at 11:16 PM}}\uc0\u8232 I can\'b4t get the function to work either - could you maybe put the excel sheet up for download somewhere ?\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	15.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1478193611863#c7355171585046171497"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 November 3, 2016 at 7:20 PM}}
+\i0 \uc0\u8232 Hi, I'm a bit confused:\u8232 Default probability=CDS/Loss so Survival pb = (Loss-CDS)/Loss.\u8232 In your 1st time step code it seems you have Survival pb=Loss/(CDS+Loss).\u8232 Is there something I'm missing?\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	16.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17092818463104704509"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Mikael Katajam\'e4ki}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1478205734837#c6369739235863094096"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 November 3, 2016 at 10:42 PM}}\uc0\u8232 JP Morgan (standard) model for pricing credit default swaps says :\u8232 CDS premium leg PV = CDS[T] * SUM(DF[0,Ti] * SP[Ti] * dT)\u8232 CDS Default leg PV = (1 - R) * SUM(DF[0,Ti] * (SP[Ti-1] - SP[Ti]))\u8232 \u8232 R, dT, CDS[T] and DF[0,T..] are known. SP[Ti] can be inferred from this known data by using CDS pricing formula recursively. Today (at T=0) SP must be 1. For the first period, equate default and premium leg. After some tedious algebra, we get SP[T1] = (1 - R) / ((1 - R) + CDS * dT), which you see in that code.\u8232 \u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	17.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1478628063800#c7881206826686965063"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 November 8, 2016 at 8:01 PM}}
+\i0 \uc0\u8232 Hi, thanks for your quick answer!\u8232 I think what is missing in your Premium leg is the accrual of the CDS up to the date of default when there is a default.\u8232 In your framework defaults are yearly at year end so whether default happens or not, the CDS coupon is paid for that year. \u8232 To simplify let\'92s look at the 1 year case, writing premium=default:\u8232 CDS=(1-R)(1-SP) as opposed to CDS*SP=(1-R)(1-SP).\u8232 So SP=(1-R-CDS)/(1-R) instead of SP=(1-R)/(1-R+SP).\u8232 The difference is minute for small CDS but becomes more material with large CDS.\u8232 Let\'92s check our intuition with an example: Maturity=1yr, if R=80% and CDS=20% then the probability of survival should be 0 (because the CDS is equal to the loss given default).\u8232 With my formula I get: SP=0/20%=0% with yours I get SP=20%/40%=50%.\u8232 This is why I was confused by some of the results initially and reached out. \u8232 I think because your defaults are annual year end you can in the general case replace SP[Ti] by SP[Ti-1] in your formula or else just add the accrual element in the case of default. But please check.\u8232 Princeton website has: \u931 D(ti )q(ti )Sd + \u931 D(ti )\{q(ti-1 )-q(ti )\}S*di /2 (because they have the default happen in the middle of the period).\u8232 https://www.princeton.edu/~markus/teaching/Eco467/10Lecture/CDS%20Presentation%20with%20References.pdf\u8232 \u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	18.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17092818463104704509"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Mikael Katajam\'e4ki}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1478641219535#c2535601693937312318"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 November 8, 2016 at 11:40 PM}}\uc0\u8232 I checked that Princeton paper and you are absolutely correct, that this presented equation (which is SIMPLE JP Morgan model) completely ignores the effect of such premium accruals, as you presented.\u8232 \u8232 Check out this paper: Lehman Brothers Fixed Income Quantitative Credit Research, (Dominic O'Kane and Stuart Turnbull). On chapter 5, there is a discussion concerning premium leg valuation and related accrual effects (the difference is minute for small CDS but becomes more material with large CDS): http://www.javaquant.net/papers/ValuationCDSLehman.pdf\u8232 \u8232 There is also suggestions available for including such premium accrual into this model.\u8232 \u8232 -Mike\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Replies}}\
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sl280\partightenfactor0
+\ls2\ilvl1\cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "https://www.blogger.com/profile/17092818463104704509"}}{\fldrslt 
+\i \cf2 \ul \ulc2 \strokec2 Mikael Katajam\'e4ki}}{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1478641583873#c553017007530666755"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 November 8, 2016 at 11:46 PM}}\uc0\u8232 Personally I have to admit, that I actually did not pay enough attention to this issue as I was writing that bootstrapping function. The devil is always in the details :)\u8232 \u8232 -Mike\u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl1\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sl280\partightenfactor0
+\ls2\ilvl0\cf3 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	19.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 \u8232 \u8232 \u8232 \
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	20.	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec3 \uc0\u8232 
+\i Anonymous{\field{\*\fldinst{HYPERLINK "http://mikejuniperhill.blogspot.com/2014/08/bootstrapping-default-probabilities.html?showComment=1478902573421#c6445487949271259965"}}{\fldrslt 
+\i0 \cf2 \ul \ulc2 \strokec2 November 12, 2016 at 12:16 AM}}
+\i0 \uc0\u8232 No problem, I really appreciate your feedback. I am a trader not a quant, but I am working on a stochastic model where I used your code. I enjoy the constructive discussion! :)\u8232 {\field{\*\fldinst{HYPERLINK "javascript:;"}}{\fldrslt \cf2 \ul \ulc2 \strokec2 Reply}}\uc0\u8232 \
+\pard\pardeftab720\sl280\partightenfactor0
+
+\b\fs36 \cf3 \
+}
